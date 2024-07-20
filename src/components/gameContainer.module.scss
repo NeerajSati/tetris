@@ -1,0 +1,47 @@
+.gameContainer {
+    width: 600px;
+    margin: auto;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    .block {
+        width: 50px;
+        height: 50px;
+        border: 3px solid;
+        border-left-color: rgba(255, 255, 255, 0.34);
+        border-top-color: rgba(255, 255, 255, 0.34);
+        border-right-color: rgba(0, 0, 0, 0.7);
+        border-bottom-color: rgba(0, 0, 0, 0.7);
+        box-shadow:
+            inset rgba(60, 70, 85, 0.5) 0px 0px 3px 0px,
+            inset rgba(60, 70, 85, 0.5) 0px 0px 5px 0px,
+            inset rgb(0, 0, 0) 0px 0px 10px -20px;
+    }
+    .defaultBlock {
+        box-shadow: none;
+    }
+}
+
+.upcomingContainer {
+    .row {
+        display: flex;
+        flex-direction: row;
+    }
+    .upcomingBlock {
+        width: 40px;
+        height: 40px;
+        border: 3px solid transparent;
+
+        &Chosen {
+            border-left-color: rgba(255, 255, 255, 0.34);
+            border-top-color: rgba(255, 255, 255, 0.34);
+            border-right-color: rgba(0, 0, 0, 0.7);
+            border-bottom-color: rgba(0, 0, 0, 0.7);
+            box-shadow:
+                inset rgba(60, 70, 85, 0.5) 0px 0px 3px 0px,
+                inset rgba(60, 70, 85, 0.5) 0px 0px 5px 0px,
+                inset rgb(0, 0, 0) 0px 0px 10px -20px;
+        }
+    }
+}
