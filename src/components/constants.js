@@ -73,3 +73,22 @@ export const SHAPES = [
     [1, 1],
   ],
 ];
+
+export const STATIC_BLOCK = {
+  color: DEFAULT_COLOR,
+};
+
+export const getNewBoard = () => {
+  const array = [];
+
+  for (let i = 0; i < BOARD_HEIGHT; i++) {
+    array[i] = [];
+    for (let j = 0; j < BOARD_WIDTH; j++) {
+      array[i][j] = {
+        id: `${i}_${Math.random() * BOARD_WIDTH}`,
+        ...STATIC_BLOCK,
+      };
+    }
+  }
+  return array;
+};

@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import Styles from "./gameContainer.module.scss";
 import {
-  BOARD_HEIGHT,
   BOARD_WIDTH,
   COLORS,
   DEFAULT_COLOR,
+  getNewBoard,
   SHAPES,
+  STATIC_BLOCK,
 } from "./constants";
 import clsx from "clsx";
 
@@ -14,25 +15,10 @@ const getRandom = (limit) => {
 };
 
 function GameContainer() {
-  let staticBlock = {
-    color: DEFAULT_COLOR,
-  };
-  const [blocks, setBlocks] = useState(() => {
-    const array = [];
-
-    for (let i = 0; i < BOARD_HEIGHT; i++) {
-      array[i] = [];
-      for (let j = 0; j < BOARD_WIDTH; j++) {
-        array[i][j] = {
-          id: `${i}_${Math.random() * BOARD_WIDTH}`,
-          ...staticBlock,
-        };
-      }
-    }
-    return array;
-  });
-
+  const [blocks, setBlocks] = useState(getNewBoard);
   const [blockSpawn, setBlockSpawn] = useState(true);
+  const [gameOver, setGameOver] = useState(false);
+  const [replay, setReplay] = useState(0);
   const [upcomingShape, setUpcomingShape] = useState(() =>
     getRandom(SHAPES.length)
   );
@@ -47,6 +33,8 @@ function GameContainer() {
   upcomingShapeRef.current = upcomingShape;
   const upcomingColorRef = useRef(upcomingColor);
   upcomingColorRef.current = upcomingColor;
+  const gameOverRef = useRef(gameOver);
+  gameOverRef.current = gameOver;
 
   const checkForPointRows = () => {
     setBlocks((list) => {
@@ -72,7 +60,7 @@ function GameContainer() {
         for (let i = 0; i < BOARD_WIDTH; i++) {
           newRow.push({
             id: `${i}_${Math.random() * BOARD_WIDTH}`,
-            ...staticBlock,
+            ...STATIC_BLOCK,
           });
         }
         list.unshift(newRow);
@@ -108,14 +96,38 @@ function GameContainer() {
 
     setBlocks((list) => {
       for (let i = 0; i < shape.length; i++) {
+        if (i !== 0) {
+          //Check next line if it is possible to move handle spawn after 2nd row
+          for (let j = 0; j < shape[0].length; j++) {
+            if (
+              shape[i][j] &&
+              list[0 + i][startAt + j].color !== DEFAULT_COLOR
+            ) {
+              // It is a conflict so game over
+              setGameOver(true);
+              return list;
+            }
+          }
+        }
+
+        // Handle spawn on first row
+        let conflict = false;
         for (let j = 0; j < shape[0].length; j++) {
           if (shape[i][j]) {
+            if (list[0 + i][startAt + j].move) {
+              conflict = true;
+            }
             list[0 + i][startAt + j] = {
               ...list[0 + i][startAt + j],
               color: color,
               move: true,
             };
           }
+        }
+        if (conflict) {
+          // It is a conflict so game over
+          setGameOver(true);
+          return list;
         }
       }
       return list;
@@ -173,7 +185,7 @@ function GameContainer() {
               };
               list[i][j] = {
                 ...list[i][j],
-                ...staticBlock,
+                ...STATIC_BLOCK,
                 move: false,
               };
             }
@@ -187,7 +199,7 @@ function GameContainer() {
               };
               list[i][j] = {
                 ...list[i][j],
-                ...staticBlock,
+                ...STATIC_BLOCK,
                 move: false,
               };
             }
@@ -200,20 +212,30 @@ function GameContainer() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      if (blockSpawnRef.current) {
+      if (gameOverRef.current) {
+        clearInterval(timer);
+      } else if (blockSpawnRef.current) {
         createBlock();
       } else {
         moveTetra(0, 0, 1);
       }
     }, 500);
 
-    window.addEventListener("keydown", (e) => {
+    const onKeyPress = (e) => {
+      if (gameOverRef.current) {
+        return;
+      }
       if (e.code === "ArrowDown") moveTetra(0, 0, 1);
       if (e.code === "ArrowRight") moveTetra(1, 0, 0);
       if (e.code === "ArrowLeft") moveTetra(0, 1, 0);
-    });
-    return () => clearInterval(timer);
-  }, []);
+    };
+    window.addEventListener("keydown", onKeyPress);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("keydown", onKeyPress);
+    };
+  }, [replay]);
 
   return (
     <>
@@ -231,8 +253,23 @@ function GameContainer() {
             ></div>
           ))
         )}
+        {gameOver && (
+          <div className={Styles.gameOverContainer}>
+            Game Over
+            <button
+              className={Styles.replay}
+              onClick={() => {
+                setBlocks(getNewBoard());
+                setReplay(replay + 1);
+                setGameOver(false);
+                setBlockSpawn(true);
+              }}
+            >
+              Replay
+            </button>
+          </div>
+        )}
       </div>
-      {console.log(upcomingColor, upcomingShape)}
       <div className={Styles.upcomingContainer}>
         {SHAPES[upcomingShape].map((row) => (
           <div className={Styles.row}>

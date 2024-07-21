@@ -1,9 +1,9 @@
 .gameContainer {
-    width: 600px;
-    margin: auto;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(10,55px);
+    gap: 0;
+    width: fit-content;
 
     .block {
         width: 50px;
@@ -20,6 +20,30 @@
     }
     .defaultBlock {
         box-shadow: none;
+    }
+    .gameOverContainer {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        font-family: fantasy;
+        backdrop-filter: blur(4px);
+        background-color: #0000008c;
+        color: white;
+
+        .replay {
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 20px;
+            padding: 8px 20px;
+            margin-top: 10px;
+        }
     }
 }
 
