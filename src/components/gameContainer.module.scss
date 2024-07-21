@@ -47,6 +47,22 @@
     }
 }
 
+.pauseRow {
+    display: flex;
+    flex: row;
+    align-items: flex-start;
+    padding: 10px;
+
+    .pauseButton {
+        background-color: black;
+        border-radius: 5px;
+        color: white;
+        font-family: monospace;
+        font-size: 20px;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+}
 .upcomingContainer {
     .row {
         display: flex;

@@ -18,6 +18,7 @@ function GameContainer() {
   const [blocks, setBlocks] = useState(getNewBoard);
   const [blockSpawn, setBlockSpawn] = useState(true);
   const [gameOver, setGameOver] = useState(false);
+  const [pauseGame, setPauseGame] = useState(false);
   const [replay, setReplay] = useState(0);
   const [upcomingShape, setUpcomingShape] = useState(() =>
     getRandom(SHAPES.length)
@@ -35,6 +36,8 @@ function GameContainer() {
   upcomingColorRef.current = upcomingColor;
   const gameOverRef = useRef(gameOver);
   gameOverRef.current = gameOver;
+  const pauseRef = useRef(pauseGame);
+  pauseRef.current = pauseGame;
 
   const checkForPointRows = () => {
     setBlocks((list) => {
@@ -212,7 +215,9 @@ function GameContainer() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      if (gameOverRef.current) {
+      if (pauseRef.current) {
+        return;
+      } else if (gameOverRef.current) {
         clearInterval(timer);
       } else if (blockSpawnRef.current) {
         createBlock();
@@ -222,7 +227,7 @@ function GameContainer() {
     }, 500);
 
     const onKeyPress = (e) => {
-      if (gameOverRef.current) {
+      if (gameOverRef.current || pauseRef.current) {
         return;
       }
       if (e.code === "ArrowDown") moveTetra(0, 0, 1);
@@ -269,7 +274,31 @@ function GameContainer() {
             </button>
           </div>
         )}
+        {pauseGame && (
+          <div className={Styles.gameOverContainer}>
+            Paused
+            <button
+              className={Styles.replay}
+              onClick={() => {
+                setPauseGame(false);
+              }}
+            >
+              Continue
+            </button>
+          </div>
+        )}
       </div>
+      {!gameOver && (
+        <div className={Styles.pauseRow}>
+          <button
+            className={Styles.pauseButton}
+            onClick={() => setPauseGame(true)}
+          >
+            Pause
+          </button>
+        </div>
+      )}
+
       <div className={Styles.upcomingContainer}>
         {SHAPES[upcomingShape].map((row) => (
           <div className={Styles.row}>
