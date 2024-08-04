@@ -1,14 +1,160 @@
+.console {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: calc(100dvh - 32px);
+    background-color: #f3f2df;
+    padding: 16px;
+
+    .title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 0;
+        margin: 0 0 10px;
+        svg {
+            width: 40px;
+        }
+    }
+    .bottomPanel {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        padding-top: 10px;
+
+        .upcomingContainer {
+            position: relative;
+            p {
+                color: white;
+                font-family: monospace;
+                position: absolute;
+                top: -8px;
+            }
+            flex: none;
+            background-color: black;
+            padding: 25px 10px 5px;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            .row {
+                display: flex;
+                flex-direction: row;
+            }
+
+            .upcomingBlock {
+                width: 15px;
+                height: 15px;
+                border: 3px solid transparent;
+
+                // @media screen and (min-width: $small) {
+                //     width: 20px;
+                //     height: 20px;
+                // }
+
+                &Chosen {
+                    border-left-color: rgba(255, 255, 255, 0.34);
+                    border-top-color: rgba(255, 255, 255, 0.34);
+                    border-right-color: rgba(0, 0, 0, 0.7);
+                    border-bottom-color: rgba(0, 0, 0, 0.7);
+                    box-shadow:
+                        inset rgba(60, 70, 85, 0.5) 0px 0px 3px 0px,
+                        inset rgba(60, 70, 85, 0.5) 0px 0px 5px 0px,
+                        inset rgb(0, 0, 0) 0px 0px 10px -20px;
+                }
+            }
+        }
+        .pauseRow {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 10px;
+            row-gap: 10px;
+
+            .pauseButton {
+                background-color: black;
+                border-radius: 5px;
+                color: white;
+                font-family: monospace;
+                font-size: 14px;
+                padding: 5px 10px;
+                cursor: pointer;
+
+                &.disabled {
+                    opacity: 0.9;
+                    background-color: rgb(58, 58, 58);
+                }
+            }
+        }
+        .consoleButtons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0px;
+            margin-left: 20px;
+
+            div {
+                display: flex;
+                gap: 30px;
+            }
+            svg {
+                width: 30px;
+                height: 40px;
+                fill: rgb(134, 130, 130);
+            }
+            button {
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 100%;
+                outline: none;
+                padding: 1px;
+                background-color: #222;
+                cursor: pointer;
+            }
+            .up svg {
+                transform: rotate(90deg);
+            }
+            .right svg {
+                transform: rotate(180deg);
+            }
+            .down svg {
+                transform: rotate(270deg);
+            }
+        }
+    }
+}
+.scoreContainer {
+    padding-top: 10px;
+    font-size: 20px;
+    font-family: monospace;
+    span {
+        font-weight: 700;
+    }
+}
 .gameContainer {
     position: relative;
     display: grid;
-    grid-template-columns: repeat(10,55px);
+    grid-template-columns: repeat(13, 22px);
+    // grid-template-columns: repeat(10, 55px);
     gap: 0;
     width: fit-content;
 
     .block {
-        width: 50px;
-        height: 50px;
-        border: 3px solid;
+        width: 20px;
+        height: 20px;
+        // width: 50px;
+        // height: 50px;
+        border: 2px solid;
         border-left-color: rgba(255, 255, 255, 0.34);
         border-top-color: rgba(255, 255, 255, 0.34);
         border-right-color: rgba(0, 0, 0, 0.7);
@@ -31,57 +177,81 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        font-size: 48px;
-        font-family: fantasy;
+        font-size: 20px;
+        font-family: monospace, sans-serif;
         backdrop-filter: blur(4px);
-        background-color: #0000008c;
+        background-color: #0000009d;
         color: white;
 
         .replay {
             cursor: pointer;
             font-family: monospace;
-            font-size: 20px;
+            font-weight: 600;
             padding: 8px 20px;
             margin-top: 10px;
+            font-size: 14px;
+        }
+        p {
+            font-size: 24px;
+            font-weight: 700;
+        }
+    }
+    .gameScoreContainer {
+        font-family: fantasy;
+        backdrop-filter: none;
+        background-color: transparent;
+
+        p {
+            animation-name: example;
+            animation-duration: 1.2s;
+            opacity: 0;
+            letter-spacing: 2px;
+            -webkit-text-stroke: 5px black;
+            paint-order: stroke fill;
+            font-family: sans-serif;
+            text-transform: capitalize;
+            white-space: break-spaces;
+            font-size: 24px;
+        }
+        .small {
+            font-size: 30px;
+            color: #ffb2b2;
+            font-weight: 600;
+        }
+
+        .medium {
+            font-size: 35px;
+            color: yellow;
+            font-weight: 600;
+        }
+
+        .large {
+            font-size: 40px;
+            color: #8dbbff;
+            font-weight: 600;
+        }
+
+        .xlarge {
+            font-size: 50px;
+            color: #a5ffc9;
+            font-weight: 600;
         }
     }
 }
 
-.pauseRow {
-    display: flex;
-    flex: row;
-    align-items: flex-start;
-    padding: 10px;
-
-    .pauseButton {
-        background-color: black;
-        border-radius: 5px;
-        color: white;
-        font-family: monospace;
-        font-size: 20px;
-        padding: 5px 10px;
-        cursor: pointer;
+@keyframes example {
+    0% {
+        transform: none;
+        opacity: 1;
     }
-}
-.upcomingContainer {
-    .row {
-        display: flex;
-        flex-direction: row;
-    }
-    .upcomingBlock {
-        width: 40px;
-        height: 40px;
-        border: 3px solid transparent;
 
-        &Chosen {
-            border-left-color: rgba(255, 255, 255, 0.34);
-            border-top-color: rgba(255, 255, 255, 0.34);
-            border-right-color: rgba(0, 0, 0, 0.7);
-            border-bottom-color: rgba(0, 0, 0, 0.7);
-            box-shadow:
-                inset rgba(60, 70, 85, 0.5) 0px 0px 3px 0px,
-                inset rgba(60, 70, 85, 0.5) 0px 0px 5px 0px,
-                inset rgb(0, 0, 0) 0px 0px 10px -20px;
-        }
+    70% {
+        transform: translateY(-70px);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-100px);
+        opacity: 0;
     }
 }

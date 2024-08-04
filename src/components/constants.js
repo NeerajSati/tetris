@@ -1,13 +1,13 @@
-export const BOARD_WIDTH = 10;
-export const BOARD_HEIGHT = 12;
+export const BOARD_WIDTH = 13;
+export const BOARD_HEIGHT = 15;
 export const COLORS = [
   "#00ffff",
   "#ffff00",
-  "#800080",
-  "#00ff00",
   "#ff0000",
-  "#0000ff",
+  "#4683ff",
   "#ff7f00",
+  "#FF78DB",
+  "#afff00",
 ];
 export const DEFAULT_COLOR = "#222222";
 // export const DEFAULT_COLOR = "#969696";

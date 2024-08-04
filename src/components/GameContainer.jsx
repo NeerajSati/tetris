@@ -10,12 +10,19 @@ import {
   STATIC_BLOCK,
 } from "./constants";
 import clsx from "clsx";
+import { ReactComponent as LeftArrow } from "../assets/LeftArrow.svg";
+import { ReactComponent as Logo } from "../assets/Logo.svg";
 
 const getRandom = (limit) => {
   return Math.floor(Math.random() * limit);
 };
 
 function GameContainer() {
+  const [score, setScore] = useState(0);
+  const [scorePopup, setScorePopup] = useState({
+    text: "",
+    score: "",
+  });
   const [blocks, setBlocks] = useState(getNewBoard);
   const [blockSpawn, setBlockSpawn] = useState(true);
   const [gameOver, setGameOver] = useState(false);
@@ -43,6 +50,38 @@ function GameContainer() {
   const currentColorRef = useRef(DEFAULT_COLOR);
   const currentMoveRef = useRef({ row: 0, col: 0 });
   const rotateActiveRef = useRef(false);
+  const lastColors = useRef([]);
+  const lastShapes = useRef([]);
+
+  const handleScoreUpdate = (type, point) => {
+    if (type === "row") {
+      let bonus = 0;
+      switch (point) {
+        case 1:
+          setScorePopup({ text: "Got a row!", score: "+100" });
+          bonus = 100;
+          break;
+        case 2:
+          setScorePopup({ text: "Double attack!", score: "+300" });
+          bonus = 300;
+          break;
+        case 3:
+          setScorePopup({ text: "Triple attack!", score: "+500" });
+          bonus = 500;
+          break;
+        default:
+          setScorePopup({ text: "Tetrific!", score: "+1000" });
+          bonus = 1000;
+      }
+      setScore((score) => score + bonus);
+
+      setTimeout(() => {
+        setScorePopup({ text: "", score: "" });
+      }, 1000);
+    } else if (type === "block") {
+      setScore((score) => score + 10);
+    }
+  };
 
   const checkForPointRows = () => {
     setBlocks((list) => {
@@ -73,6 +112,9 @@ function GameContainer() {
         list.unshift(newRow);
       });
 
+      if (rowsToDelete.length > 0)
+        handleScoreUpdate("row", rowsToDelete.length);
+
       return list;
     });
   };
@@ -90,16 +132,20 @@ function GameContainer() {
     };
     currentColorRef.current = color;
 
-    // nextShape should not be same as previous one
+    if (lastShapes.current.length > 5) lastShapes.current.shift();
+    lastShapes.current.push(upcomingShapeRef.current);
+    // nextShape should not be same as last 6 shapes
     let nextShape = getRandom(SHAPES.length);
-    while (upcomingShapeRef.current === nextShape) {
+    while (lastShapes.current.includes(nextShape)) {
       nextShape = getRandom(SHAPES.length);
     }
     setUpcomingShape(nextShape);
 
-    // nextColor should not be same as previous one
+    if (lastColors.current.length > 3) lastColors.current.shift();
+    lastColors.current.push(color);
+    // nextColor should not be same as last 4 colors
     let nextColor = COLORS[getRandom(COLORS.length)];
-    while (upcomingColorRef.current === nextColor) {
+    while (lastColors.current.includes(nextColor)) {
       nextColor = COLORS[getRandom(COLORS.length)];
     }
     setUpcomingColor(nextColor);
@@ -188,6 +234,7 @@ function GameContainer() {
             list[i][j].move = false;
           }
         }
+        handleScoreUpdate("block");
         setBlockSpawn(true);
         rotateActiveRef.current = false;
         return list;
@@ -312,6 +359,26 @@ function GameContainer() {
     });
   };
 
+  const handleRestart = () => {
+    setScore(0);
+    setBlocks(getNewBoard());
+    setReplay(replay + 1);
+    setGameOver(false);
+    setPauseGame(false);
+    setBlockSpawn(true);
+    rotateActiveRef.current = false;
+  };
+
+  const onKeyPress = (e) => {
+    if (gameOverRef.current || pauseRef.current) {
+      return;
+    }
+    if (e.code === "ArrowDown") moveTetra(0, 0, 1);
+    if (e.code === "ArrowRight") moveTetra(1, 0, 0);
+    if (e.code === "ArrowLeft") moveTetra(0, 1, 0);
+    if (e.code === "ArrowUp" && rotateActiveRef.current) rotateTetra();
+  };
+
   useEffect(() => {
     const timer = setInterval(() => {
       if (pauseRef.current) {
@@ -327,15 +394,6 @@ function GameContainer() {
       }
     }, 500);
 
-    const onKeyPress = (e) => {
-      if (gameOverRef.current || pauseRef.current) {
-        return;
-      }
-      if (e.code === "ArrowDown") moveTetra(0, 0, 1);
-      if (e.code === "ArrowRight") moveTetra(1, 0, 0);
-      if (e.code === "ArrowLeft") moveTetra(0, 1, 0);
-      if (e.code === "ArrowUp" && rotateActiveRef.current) rotateTetra();
-    };
     window.addEventListener("keydown", onKeyPress);
 
     return () => {
@@ -345,7 +403,11 @@ function GameContainer() {
   }, [replay]);
 
   return (
-    <>
+    <div className={Styles.console}>
+      <h1 className={Styles.title}>
+        <Logo />
+        Tetris
+      </h1>
       <div className={Styles.gameContainer}>
         {blocks.map((row) =>
           row.map((block) => (
@@ -363,18 +425,8 @@ function GameContainer() {
         {gameOver && (
           <div className={Styles.gameOverContainer}>
             Game Over
-            <button
-              className={Styles.replay}
-              onClick={() => {
-                setBlocks(getNewBoard());
-                setReplay(replay + 1);
-                setGameOver(false);
-                setBlockSpawn(true);
-                rotateActiveRef.current = false;
-              }}
-            >
-              Replay
-            </button>
+            <br />
+            <p>Your Score: {score}</p>
           </div>
         )}
         {pauseGame && (
@@ -390,33 +442,93 @@ function GameContainer() {
             </button>
           </div>
         )}
+        {scorePopup.text.length > 0 && (
+          <div
+            className={clsx(
+              Styles.gameOverContainer,
+              Styles.gameScoreContainer
+            )}
+          >
+            <p>
+              {scorePopup.text}
+              <br />
+              <span
+                className={clsx({
+                  [Styles.small]: scorePopup.score === "+100",
+                  [Styles.medium]: scorePopup.score === "+300",
+                  [Styles.large]: scorePopup.score === "+500",
+                  [Styles.xlarge]: scorePopup.score === "+1000",
+                })}
+              >
+                {scorePopup.score}
+              </span>
+            </p>
+          </div>
+        )}
       </div>
-      {!gameOver && (
+      <div className={Styles.scoreContainer}>
+        Score: <span>{score}</span>
+      </div>
+      <div className={Styles.bottomPanel}>
+        <div className={Styles.upcomingContainer}>
+          <p>Upcoming</p>
+          {SHAPES[upcomingShape].map((row) => (
+            <div className={Styles.row}>
+              {row.map((col) => (
+                <div
+                  className={clsx(Styles.upcomingBlock, {
+                    [Styles.upcomingBlockChosen]: col,
+                  })}
+                  style={col ? { backgroundColor: upcomingColor } : null}
+                ></div>
+              ))}
+            </div>
+          ))}
+        </div>
         <div className={Styles.pauseRow}>
           <button
-            className={Styles.pauseButton}
+            className={clsx(Styles.pauseButton, {
+              [Styles.disabled]: gameOver,
+            })}
+            disabled={gameOver}
             onClick={() => setPauseGame(true)}
           >
             Pause
           </button>
+          <button className={Styles.pauseButton} onClick={handleRestart}>
+            Restart
+          </button>
         </div>
-      )}
-
-      <div className={Styles.upcomingContainer}>
-        {SHAPES[upcomingShape].map((row) => (
-          <div className={Styles.row}>
-            {row.map((col) => (
-              <div
-                className={clsx(Styles.upcomingBlock, {
-                  [Styles.upcomingBlockChosen]: col,
-                })}
-                style={col ? { backgroundColor: upcomingColor } : null}
-              ></div>
-            ))}
+        <div className={Styles.consoleButtons}>
+          <button
+            className={Styles.up}
+            onClick={() => onKeyPress({ code: "ArrowUp" })}
+          >
+            <LeftArrow />
+          </button>
+          <div>
+            <button
+              className={Styles.left}
+              onClick={() => onKeyPress({ code: "ArrowLeft" })}
+            >
+              <LeftArrow />
+            </button>
+            <button
+              className={Styles.right}
+              onClick={() => onKeyPress({ code: "ArrowRight" })}
+            >
+              <LeftArrow />
+            </button>
           </div>
-        ))}
+          <button
+            className={Styles.down}
+            onClick={() => onKeyPress({ code: "ArrowDown" })}
+          >
+            <LeftArrow />
+          </button>
+        </div>
       </div>
-    </>
+    </div>
   );
 }
 
